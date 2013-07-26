@@ -58,10 +58,12 @@ Each dict in the fields list can take the following keys:
 :name: A name for the field.  The returned dict will use this as a key.
 :label: A label to use on the form for this field, if you want it to be different from the name.
 :type: The type of widget to use, can be:
+
         - "text" (regular text entry)
 	- "hidden_text" (obfuscated text entry, e.g. password fields),
         - "checkbox" (takes a Boolean)
 	- "select" (drop-down select box)
+
 :default: The default value to set this field to.  Must be a valid type and value for the widget.
 :options: For "select" type fields, a list of strings to provide as options.  For other types, this value is ignored.
 
