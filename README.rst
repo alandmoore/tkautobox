@@ -5,9 +5,9 @@ TkAutoBox
 Abstract
 ========
 
-Tkinter provides several convenience functions for common dialogs like file dialogs or color dialogs.  I wanted a similar convenience function for arbitrary dialogs that could ask an easily-extendible set of fields and simply return a dict of values when clicked.  This can be useful for things like login dialogs, simple configuration dialogs, or installation/setup dialogs.
+Tkinter provides several convenience functions for common dialogues like file dialogues or color dialogues.  I wanted a similar convenience function for arbitrary dialogues that could ask an easily-extendable set of fields and simply return a dict of values when clicked.  This can be useful for things like login dialogues, simple configuration dialogues, or installation/setup dialogues.
 
-The TkAutoBox module is a python3 module that implements a generic convience function for this, as well as wrapper functions for common dialogs.
+The TkAutoBox module is a python3 module that implements a generic convenience function for this, as well as wrapper functions for common dialogues.
 
 Usage
 =====
@@ -46,7 +46,7 @@ autobox()
 This is the wrapper function for the generic dialog box.  When called, it will create and show the dialog; when the user clicks the OK button, the dialog will close and the function returns a dict of name/value pairs for the form.  It takes no positional arguments, but the following keyword arguments are accepted:
 
 :title_string: The string to display in the title bar of the dialog
-:header_string: A string to dislplay at the top of the dialog
+:header_string: A string to display at the top of the dialog
 :error_message: A message to display in red text below the header string
 :ok_label: The string to put on the OK button.  Default is "OK".
 :theme: A TK theme to use for the dialog
@@ -75,7 +75,7 @@ loginbox()
 
 The loginbox() function is a wrapper around autobox() that provides a standard login dialog with "username" and "password" fields.  It can accept all the same keyword arguments as autobox(), but should not define the "fields" list.  It accepts the following extra keywords:
 
-:additional_fields: A list, using identical syntax to autobox's "fields" list, that will define additonal fields below "password" (e.g., domain, database, etc.).
+:additional_fields: A list, using identical syntax to autobox's "fields" list, that will define additional fields below "password" (e.g., domain, database, etc.).
 :default_username: A username to populate the "username" field with.
 
 
