@@ -10,6 +10,7 @@ It's useful for things like login boxes or small configuration dialogs.
 It requires at least python 3.
 The box is extensible with any number of custom fields simply by passing in a list of dicts.
 """
+
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import font
@@ -17,7 +18,7 @@ from tkinter import font
 
 class Autobox(Tk):
     """
-    This class should probably not be instanciated directly, but rather the various wrapper functions should be used.
+    This class should probably not be instantiated directly, but rather the various wrapper functions should be used.
     """
     variable_types = {"text": StringVar, "hidden_text": StringVar, "checkbox":BooleanVar, "select": StringVar}
 
@@ -62,7 +63,6 @@ class Autobox(Tk):
 
         #Create variables
         self.data = {}
-
 
         # Fields need, at minimum, a name, unless they're a label
         self.fields = [x for x in self.fields if x.get("name") or x.get("type") == "label"]
@@ -115,6 +115,7 @@ class Autobox(Tk):
 
     def ok_clicked(self, *args):
         self.data = { key : var.get() for key, var in self.data.items() }
+        self.data["_clicked_ok"] = True
         self.quit()
 
     def cancel_clicked(self, *args):
@@ -134,6 +135,7 @@ def loginbox(**kwargs):
     Additional field specifications can be added with the additional_fields keyword.
     The remaining keywords are passed on to the class.
     """
+    
     additional_fields = kwargs.get("additional_fields") and kwargs.pop("additional_fields") or []
     ok_label = kwargs.get("ok_label", "Log In")
     default_username = kwargs.get("default_username") and kwargs.pop("default_username") or ""
