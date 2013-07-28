@@ -41,6 +41,7 @@ class Autobox(Tk):
         - theme: String; The TK theme to use. invalid themes will be ignored.
         - padding: Integer; The number of pixels to put around elements.
         - ok_label: String; Text for the OK button, defaults to "OK"
+        - cancel_label: String; Text for the Cancel button, defaults to "Cancel"
         """
         Tk.__init__(self)
         #Pull in the keyword arguments
@@ -51,6 +52,7 @@ class Autobox(Tk):
         self.error_message = kwargs.get("error_message", None)
         self.theme = kwargs.get("theme")
         self.ok_label = kwargs.get("ok_label", "OK")
+        self.cancel_label = kwargs.get("cancel_label", "Cancel")
         #set theme, if it's valid
         s = Style()
         if self.theme in s.theme_names():
@@ -106,7 +108,7 @@ class Autobox(Tk):
         #Login/cancel buttons
         self.ok_button = Button(self, text=self.ok_label, command=self.ok_clicked)
         self.ok_button.grid(row=999, column=0)
-        self.cancel_button = Button(self, text="Cancel", command=self.cancel_clicked)
+        self.cancel_button = Button(self, text=self.cancel_label, command=self.cancel_clicked)
         self.cancel_button.grid(row=999, column=1)
 
         #Bind keystrokes
@@ -158,7 +160,8 @@ def passwordbox(**kwargs):
     
     additional_fields = kwargs.get("additional_fields") and kwargs.pop("additional_fields") or []
     title = kwargs.get("title_string", "Change your password")
-    header = kwargs.get("header_string", "Change your password")
+    header = kwargs.get("header_string") and kwargs.pop("header_string") or "Change your password"
+    
     default_fields = [
         {"type" : "label", "label" : "First type your old password"},
         {"name" : "old_password", "type" : "hidden_text", "label" : "Old Password: "},
@@ -176,13 +179,15 @@ if __name__ == '__main__':
     test_user = "SomeUser"
     test_password = "Password"
     error_message = None
+    # Log in to our mythical domains
     while True:
         res = loginbox(
             header_string="Log in to secure server", title_string="Login",
             default_username=test_user, error_message=error_message, theme='classic',
             additional_fields = [
+                {"type" : "label", "label": "(The password is 'Password')"},
                 {"name":"domain", "type":"select", "options":["Local", "US.gov", "RU.gov"], "default": "Local", "label" : "Login Domain: "},
-                {"name" : "readonly", "type":"checkbox", "default": False, "label" : "Readonly access?"}
+                {"name" : "pwchange", "type":"checkbox", "default": False, "label" : "Prompt for password change?"}
                 ]
                 )
         if res == {}:
@@ -193,4 +198,25 @@ if __name__ == '__main__':
         else:
             error_message = "Authentication failed"
     print("Authentication success!")
-    print(passwordbox())
+
+    # If selected, change the password for the chosen domain
+    if (res.get("pwchange")):
+        error_message = ""
+        while True:
+            pw_res = passwordbox(header_string = "Change password for {}".format(res.get("domain")), error_message=error_message)
+            if pw_res.get("old_password") != "Password":
+                error_message = "The old password is not correct!"
+            elif pw_res.get("new_password") == "":
+                error_message = "You cannot change to a blank password!"
+            elif pw_res.get("new_password") != pw_res.get("confirm_password"):
+                error_message = "The new passwords do not match; please try again"
+            elif pw_res.get("new_password") == pw_res.get("old_password"):
+                error_message = "The new password cannot be the same as the old password"
+            else:
+                error_message = ""
+                break
+        print(pw_res)
+    if (autobox(header_string = "This is a great library, eh?", ok_label = "Yep", cancel_label="Nope")):
+        print("rock on!")
+    else:
+        print("Well, yeah, meh...")
