@@ -26,13 +26,13 @@ class Autobox(Tk):
         Valid keyword arguments:
 
         - title_string: String; will be the window title.
-        - header_string: String; will display  in the top of the box.
+        - header_string: String; text shown at the top of the window.
         - fields: List;  These are the form fields to add.
           It should be a list of dictionaries, each with the format:
            {
             "name" : <name of field>, string (required),
             "label" : <label to display for field>, string, if not specified "name" will be used
-            "type"  : <one of text, hidden_text, checkbox, or select>, string,
+            "type"  : <one of label, text, hidden_text, checkbox, or select>, string,
             "default" : <default value of widget>(depends on widget type),
             "options": <options for select; does nothing for others>list or tuple
            }
@@ -64,20 +64,21 @@ class Autobox(Tk):
         self.data = {}
 
 
-        # Fields need, at minimum, a name
-        self.fields = [x for x in self.fields if x.get("name")]
+        # Fields need, at minimum, a name, unless they're a label
+        self.fields = [x for x in self.fields if x.get("name") or x.get("type") == "label"]
 
         # Create the dictionary of variables for the form
         for field in self.fields:
             fn = field.get("name")
-            self.data[fn] = self.variable_types[field.get("type", "text")]()
-            self.data[fn].set(field.get("default", ""))
+            if field.get("type") != "label":
+                self.data[fn] = self.variable_types[field.get("type", "text")]()
+                self.data[fn].set(field.get("default", ""))
 
         #Build the UI
         self.title(self.title_string)
         self.widgets = {}
-        Label(text=self.header_string, font=headerfont).grid(row=0,column=0, columnspan= 2)
-
+        if self.header_string:
+            Label(text=self.header_string, font=headerfont).grid(row=0, column=0, columnspan=2, padx=self.padding, pady=self.padding)
         if self.error_message:
             Label(text=self.error_message, style='Error.TLabel').grid(row=1, column=0, columnspan=2, padx=self.padding, pady=self.padding)
         for n, field in enumerate(self.fields):
@@ -85,17 +86,20 @@ class Autobox(Tk):
             ft = field.get("type", "text")
             label = field.get("label", fn)
             rownum = n + 2
-
+            label_column_span = 1
+            
             if ft == "select":
                 self.widgets[fn] = Combobox(textvariable = self.data[fn], values = field.get("options"), state="readonly")
             elif ft == "checkbox":
                 self.widgets[fn] = Checkbutton(variable=self.data[fn])
             elif ft == "hidden_text":
                 self.widgets[fn] = Entry(textvariable = self.data[fn], show="*")
+            elif ft == "label":
+                label_column_span = 2
             else:
                 self.widgets[fn] = Entry(textvariable = self.data[fn])
-            Label(text=label).grid(row=rownum, column=0, padx=self.padding, pady=self.padding, sticky=W)
-            self.widgets[fn].grid(row=rownum, column=1, padx=self.padding, pady=self.padding, sticky=W)
+            Label(text=label).grid(row=rownum, column=0, columnspan=label_column_span, padx=self.padding, pady=self.padding, sticky=W)
+            self.widgets.get(fn) and self.widgets[fn].grid(row=rownum, column=1, padx=self.padding, pady=self.padding, sticky=W)
 
         #Add a spacer
         Label().grid(row=998, column=0, columnspan=2, pady=20)
@@ -133,7 +137,7 @@ def loginbox(**kwargs):
     additional_fields = kwargs.get("additional_fields") and kwargs.pop("additional_fields") or []
     ok_label = kwargs.get("ok_label", "Log In")
     default_username = kwargs.get("default_username") and kwargs.pop("default_username") or ""
-    title = kwargs.get("title", "Log In")
+    title = kwargs.get("title_string") and kwargs.pop("title_string") or "Log In"
 
     default_fields = [
         {"name":"username", "type": "text", "default": default_username, "label": "Username: " },
@@ -142,6 +146,26 @@ def loginbox(**kwargs):
     fields = default_fields + additional_fields
 
     return  autobox(fields=fields, ok_label=ok_label, title_string=title, **kwargs)
+
+def passwordbox(**kwargs):
+    """
+    This wrapper is for making a dialog for changing your password.  
+    It will return the old password, the new password, and a confirmation.
+    The remaining keywords are passed on to the autobox class.
+    """
+    
+    additional_fields = kwargs.get("additional_fields") and kwargs.pop("additional_fields") or []
+    title = kwargs.get("title_string", "Change your password")
+    header = kwargs.get("header_string", "Change your password")
+    default_fields = [
+        {"type" : "label", "label" : "First type your old password"},
+        {"name" : "old_password", "type" : "hidden_text", "label" : "Old Password: "},
+        {"type" : "label", "label": "Now enter your new password twice"},
+        {"name" : "new_password", "type" : "hidden_text", "label" : "New Password: "},
+        {"name" : "confirm_password", "type" : "hidden_text", "label" : "Confirm Password: "}
+    ]
+    fields = default_fields + additional_fields
+    return autobox(fields = fields, title_string = title, header_string = header, **kwargs)
 
 if __name__ == '__main__':
     """
@@ -153,7 +177,7 @@ if __name__ == '__main__':
     while True:
         res = loginbox(
             header_string="Log in to secure server", title_string="Login",
-            default_username=test_user, error_message=error_message, theme='alt',
+            default_username=test_user, error_message=error_message, theme='classic',
             additional_fields = [
                 {"name":"domain", "type":"select", "options":["Local", "US.gov", "RU.gov"], "default": "Local", "label" : "Login Domain: "},
                 {"name" : "readonly", "type":"checkbox", "default": False, "label" : "Readonly access?"}
@@ -167,3 +191,4 @@ if __name__ == '__main__':
         else:
             error_message = "Authentication failed"
     print("Authentication success!")
+    print(passwordbox())

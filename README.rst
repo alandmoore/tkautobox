@@ -59,6 +59,7 @@ Each dict in the fields list can take the following keys:
 :label: A label to use on the form for this field, if you want it to be different from the name.
 :type: The type of widget to use, can be:
 
+        - "label" is just a label, with no widget.  Use for instructions/messages/errors.
         - "text" (regular text entry)
 	- "hidden_text" (obfuscated text entry, e.g. password fields),
         - "checkbox" (takes a Boolean)
@@ -67,7 +68,8 @@ Each dict in the fields list can take the following keys:
 :default: The default value to set this field to.  Must be a valid type and value for the widget.
 :options: For "select" type fields, a list of strings to provide as options.  For other types, this value is ignored.
 
-The "name" field is the only one required.  "type" defaults to "text" if omitted, and "label" defaults to using the "name" value if omitted.
+The "name" field is required for all types except "label".  
+"type" defaults to "text" if omitted, and "label" defaults to using the "name" value if omitted.
 
 
 loginbox()
@@ -77,6 +79,13 @@ The loginbox() function is a wrapper around autobox() that provides a standard l
 
 :additional_fields: A list, using identical syntax to autobox's "fields" list, that will define additional fields below "password" (e.g., domain, database, etc.).
 :default_username: A username to populate the "username" field with.
+
+
+passwordbox()
+-------------
+
+The passwordbox() function is a wrap around autobox() that provides a password change box; it requests the old password, and the new password twice.
+Like loginbox(), it can take the "additional_fields" argument.
 
 
 Contributing
